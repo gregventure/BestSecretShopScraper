@@ -20,7 +20,7 @@ class CataloguePageFullShopSpider(scrapy.Spider):
         },
         'ITEM_PIPELINES': {
             "BestSecretShop.pipelines.SaveToMySQLPipeline_CataloguePageFullShop": 100,
-            # "BestSecretShop.pipelines.UploadToBlobStorage_CataloguePageFullShop": 200,
+            "BestSecretShop.pipelines.UploadToBlobStorage_CataloguePageFullShop": 200,
         },
         'DOWNLOAD_HANDLERS' : {
             "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
