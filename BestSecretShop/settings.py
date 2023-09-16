@@ -1,6 +1,7 @@
 # Scrapy settings for BestSecretShop project
 
 import datetime as dt
+import uuid
 
 
 BOT_NAME = "BestSecretShop"
@@ -57,6 +58,7 @@ FEED_EXPORT_ENCODING = "utf-8"
 # ------------------------------------------------------------------------------- #
 
 LOG_LEVEL = 'INFO'
+UUID_V4 = str(uuid.uuid4())
 
 # ------------------------------------------------------------------------------- #
 
@@ -73,14 +75,14 @@ DATE = str(dt.date.today()).replace("-", "_")
 # MySQLDatabase
 
 MYSQL_CATALOGUE_PAGE_FULL_SHOP_DB = 'BestSecret_Scraping'
-MYSQL_CATALOGUE_PAGE_FULL_SHOP_TB = f'CATALOGUE_PAGE_FULL_SHOP_{DATE}'
+MYSQL_CATALOGUE_PAGE_FULL_SHOP_TB = f'CATALOGUE_PAGE_FULL_SHOP_{DATE}_{UUID_V4.split("-")[0]}'
 
 # ------------------------------------------------------------------------------- #
 
 # CataloguePageFullShop
-CATALOGUE_PAGE_FULL_SHOP_OUTPUT_PATH = f'data/{dt.date.today()}_CATALOGUE_PAGE_FULL_SHOP.json'
+CATALOGUE_PAGE_FULL_SHOP_OUTPUT_PATH = f'data/{dt.date.today()}_CATALOGUE_PAGE_FULL_SHOP__{UUID_V4}.json'
 CATALOGUE_PAGE_FULL_SHOP_LOCALPATH = 'data/CATALOGUE_PAGE_FULL_SHOP.json'
-CATALOGUE_PAGE_FULL_SHOP_DEST_BLOB = f'CATALOGUE_PAGE_FULL_SHOP_{dt.date.today()}'
+CATALOGUE_PAGE_FULL_SHOP_DEST_BLOB = f'CATALOGUE_PAGE_FULL_SHOP_{dt.date.today()}__{UUID_V4}'
 
 # ------------------------------------------------------------------------------- #
 

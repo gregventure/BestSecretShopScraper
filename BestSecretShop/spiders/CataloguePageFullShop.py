@@ -9,6 +9,8 @@ from BestSecretShop.scraper.CataloguePageScraper import CataloguePageScraper
 
 from BestSecretShop.settings import CATALOGUE_PAGE_FULL_SHOP_OUTPUT_PATH
 
+product_ids = {}
+
 class CataloguePageFullShopSpider(scrapy.Spider):
     name = "CataloguePageFullShop"
     allowed_domains = ["bestsecret.com"]
@@ -18,7 +20,7 @@ class CataloguePageFullShopSpider(scrapy.Spider):
         },
         'ITEM_PIPELINES': {
             "BestSecretShop.pipelines.SaveToMySQLPipeline_CataloguePageFullShop": 100,
-            "BestSecretShop.pipelines.UploadToBlobStorage_CataloguePageFullShop": 200,
+            # "BestSecretShop.pipelines.UploadToBlobStorage_CataloguePageFullShop": 200,
         },
         'DOWNLOAD_HANDLERS' : {
             "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
@@ -97,6 +99,15 @@ class CataloguePageFullShopSpider(scrapy.Spider):
             catalogue_products = await CataloguePageScraper.get_catalogue_items(response)
         
             for prod in catalogue_products:
+                
+                if prod['sku'] in product_ids.keys():
+                    self.logger.info(
+                        f'Product({prod["sku"]}) is already scraped. \nFirts scrape at: {product_ids[prod["sku"]]} \nSecond: {prod["crawl_url"]}'
+                    )
+                    continue
+                else:
+                    product_ids[prod["sku"]] = prod["crawl_url"]
+
                 item = CataloguePageFullShopItem()
                 item["crawl_date"] = prod["crawl_date"]
                 item["crawl_url"] = prod["crawl_url"]

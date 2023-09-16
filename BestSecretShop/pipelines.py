@@ -45,4 +45,4 @@ class UploadToBlobStorage_CataloguePageFullShop():
             CATALOGUE_PAGE_FULL_SHOP_DEST_BLOB,
             CATALOGUE_PAGE_FULL_SHOP_LOCALPATH
             )
-        self.logger.info('Upload Products to BestSecretBlobStorage.')
+        self.logger.info('Upload Products to BlobStorage.')
