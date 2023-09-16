@@ -25,7 +25,7 @@ class UploadToBlobStorage_CataloguePageFullShop():
 
     def __init__(self):
         self.logger = logging.getLogger(__class__.__name__)
-        self.container = 'product-gtin'
+        self.container = 'bestsecret-de'
         
     def close_spider(self, spider):
         db = MySQLCataloguePageFullShopStore()
