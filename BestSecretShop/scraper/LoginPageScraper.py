@@ -40,7 +40,7 @@ class LoginPageScraper:
         await page.keyboard.press("Enter", delay=100)
 
         try:
-            await page.wait_for_selector('css=div.header-icons')
+            await page.wait_for_selector('css=ul.header-icons')
             cls.logger.info("Login Succesfull.")
             # await page.screenshot(path="LoginSuccesfull.png")
         except:
