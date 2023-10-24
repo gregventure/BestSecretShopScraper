@@ -69,24 +69,26 @@ class CataloguePageFullShopSpider(scrapy.Spider):
         
 
     async def parse_designer_page(self, response):
-
         designer_urls = await DesignerPageScraper.get_designer(response)
 
         self.logger.info(f"Number of Designer: {len(designer_urls)}")
 
         for url in designer_urls:
 
-            self.logger.debug(f"Request: {url}")
-
-            yield scrapy.Request(
-                url = url,
-                callback = self.parse_catalogue_page,
-                errback=self.errback_close_page,
-                meta={
-                    "playwright": True,
-                    "playwright_include_page": True,
-                }
-            )
+            self.logger.info(f"Request: {url}")
+            
+            try: 
+                yield scrapy.Request(
+                    url = url,
+                    callback = self.parse_catalogue_page,
+                    errback=self.errback_close_page,
+                    meta={
+                        "playwright": True,
+                        "playwright_include_page": True,
+                    }
+                )
+            except Exception:
+                self.logger.error(f"Request ERROR: {url}")
 
         page = response.meta["playwright_page"]
         await page.close()
@@ -122,6 +124,8 @@ class CataloguePageFullShopSpider(scrapy.Spider):
                 yield item
 
             check = await CataloguePageScraper.check_next_page(response)
+            self.logger.info(f"NextPage Page:{check}")
+
             page = response.meta["playwright_page"]
             if check:
                 await page.goto(check)

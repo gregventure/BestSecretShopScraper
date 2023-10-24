@@ -63,7 +63,6 @@ class CataloguePageScraper():
                     "ab_price": ab_price
                 }
                 
-                # print(json.dumps(article_data, indent=4))
 
                 products_data.append(product_data)
 
@@ -78,9 +77,16 @@ class CataloguePageScraper():
         page = response.meta["playwright_page"]
         soup = BeautifulSoup(await page.content(), "html.parser")
 
-        if soup.find("i", {"class": "icon-arrow-dark-right-small"}):
-            next_page = soup.find("div", {"class": "pager-pagination"}).find_all("a")
+        if soup.find("svg", {"class": "pagination-arrow"}):
+            cls.logger.info("Found lipstick-pagination.")
+
+            live_page = page.url
+            next_page = soup.find("div", {"class": "lipstick-pagination"}).find_all("a")
             next_page = next_page[len(next_page) - 1]["href"]
-            
-            return cls.BASE_URL + next_page
-        return
+            cls.logger.debug(f"Live Page: {live_page}")
+            cls.logger.debug(f"Next Page: {next_page}")
+            if live_page != next_page:
+                return cls.BASE_URL + next_page
+            else:
+                return
+        return 
