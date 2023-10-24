@@ -10,6 +10,7 @@ from BestSecretShop.scraper.CataloguePageScraper import CataloguePageScraper
 from BestSecretShop.settings import CATALOGUE_PAGE_FULL_SHOP_OUTPUT_PATH
 
 product_ids = {}
+failed_urls = []
 
 class CataloguePageFullShopSpider(scrapy.Spider):
     name = "CataloguePageFullShop"
@@ -41,6 +42,44 @@ class CataloguePageFullShopSpider(scrapy.Spider):
             }
         )
 
+    # def start_requests(self):
+        
+    #     yield scrapy.Request(
+    #         url = 'https://www.bestsecret.com/entrance/index.htm',
+    #         callback=self.test_parse_catalogue,
+    #         errback=self.errback_close_page,
+    #         meta={
+    #             "playwright": True,
+    #             "playwright_include_page": True,
+    #         }
+    #     )
+
+    async def test_parse_catalogue(self, response):
+        await LoginPageScraper.accept_cookies(response)
+        await LoginPageScraper.login(response)
+
+        page = response.meta["playwright_page"]
+        await page.close()
+
+        url = "https://www.bestsecret.com/designer_shop_category.htm?shop=label_3569&gender=MALE&back_url=/designer.htm&back_param_gender=MALE"
+        self.logger.info(f"Request: {url}")
+            
+        try: 
+            yield scrapy.Request(
+                url = url,
+                callback = self.parse_catalogue_page,
+                errback=self.errback_close_page,
+                meta={
+                    "playwright": True,
+                    "playwright_include_page": True,
+                }
+            )
+        except Exception:
+            self.logger.error(f"Request ERROR: {url}")
+
+        page = response.meta["playwright_page"]
+        await page.close()
+
 
     async def parse_login_page(self, response):
         
@@ -53,7 +92,7 @@ class CataloguePageFullShopSpider(scrapy.Spider):
             'https://www.bestsecret.com/designer.htm?gender=KIDS&storeGender=true'
         ]
         for gender_url in designer_by_gender:
-            self.logger.info(f"Request: {gender_url}")
+            self.logger.debug(f"Request: {gender_url}")
             yield scrapy.Request(
                 url = gender_url,
                 callback=self.parse_designer_page,
@@ -75,7 +114,7 @@ class CataloguePageFullShopSpider(scrapy.Spider):
 
         for url in designer_urls:
 
-            self.logger.info(f"Request: {url}")
+            self.logger.debug(f"Request: {url}")
             
             try: 
                 yield scrapy.Request(
@@ -89,9 +128,15 @@ class CataloguePageFullShopSpider(scrapy.Spider):
                 )
             except Exception:
                 self.logger.error(f"Request ERROR: {url}")
+                failed_urls.append(url)
 
         page = response.meta["playwright_page"]
         await page.close()
+
+        
+        self.logger.info(failed_urls)
+        self.logger.info(f"Anzahl failed URLs: {len(failed_urls)}")
+        self.logger.info(f"Anzahl verschiedener CVs: {len(product_ids)}")
 
 
     async def parse_catalogue_page(self, response):
@@ -124,7 +169,7 @@ class CataloguePageFullShopSpider(scrapy.Spider):
                 yield item
 
             check = await CataloguePageScraper.check_next_page(response)
-            self.logger.info(f"NextPage Page:{check}")
+            self.logger.info(f"NextPage: {check}")
 
             page = response.meta["playwright_page"]
             if check:

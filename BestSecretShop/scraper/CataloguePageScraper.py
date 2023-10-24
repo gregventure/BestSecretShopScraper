@@ -77,16 +77,17 @@ class CataloguePageScraper():
         page = response.meta["playwright_page"]
         soup = BeautifulSoup(await page.content(), "html.parser")
 
-        if soup.find("svg", {"class": "pagination-arrow"}):
-            cls.logger.info("Found lipstick-pagination.")
+        if soup.find("div", {"class": "lipstick-pagination"}):
+
+            cls.logger.debug("Found lipstick-pagination.")
 
             live_page = page.url
-            next_page = soup.find("div", {"class": "lipstick-pagination"}).find_all("a")
-            next_page = next_page[len(next_page) - 1]["href"]
+            next_page = cls.BASE_URL + soup.find("div", {"class": "lipstick-pagination"}).find_all("a")[-1]["href"]
+            
             cls.logger.debug(f"Live Page: {live_page}")
             cls.logger.debug(f"Next Page: {next_page}")
+            
             if live_page != next_page:
-                return cls.BASE_URL + next_page
-            else:
-                return
-        return 
+                return next_page
+        
+        return
