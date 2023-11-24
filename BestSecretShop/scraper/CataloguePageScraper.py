@@ -18,8 +18,14 @@ class CataloguePageScraper():
     @classmethod
     async def get_catalogue_items(cls, response):
         page = response.meta["playwright_page"]
+        
+        print(page.url)
+
         soup = BeautifulSoup(await page.content(), "html.parser")
-        catalogue_items = soup.find_all("div", {"class": "span product-container"})
+        # catalogue_items = soup.find_all("div", {"class": "span product-container"})   # OutofDate 24.11.23
+        catalogue_items = soup.find_all("div", {"class": "category-page-product-container"})
+        
+        cls.logger.info(len(catalogue_items))
 
         products_data = []
         for catalogue_item in catalogue_items:
@@ -62,7 +68,7 @@ class CataloguePageScraper():
                     "ab_uvp": ab_uvp,
                     "ab_price": ab_price
                 }
-                
+                # cls.logger.info(f"Product {product_data}")
 
                 products_data.append(product_data)
 
@@ -70,12 +76,12 @@ class CataloguePageScraper():
                 cls.logger.error(f"Failed to scrape Product at {page.url}")
                 continue
 
-        return products_data
+        return products_data, soup
 
     @classmethod
-    async def check_next_page(cls, response):
+    async def check_next_page(cls, response, soup):
         page = response.meta["playwright_page"]
-        soup = BeautifulSoup(await page.content(), "html.parser")
+        # soup = BeautifulSoup(await page.content(), "html.parser")
 
         if soup.find("div", {"class": "lipstick-pagination"}):
 

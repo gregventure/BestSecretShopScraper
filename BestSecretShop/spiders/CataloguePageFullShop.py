@@ -86,6 +86,9 @@ class CataloguePageFullShopSpider(scrapy.Spider):
         await LoginPageScraper.accept_cookies(response)
         await LoginPageScraper.login(response)
 
+        self.logger.info("########################################")
+        self.logger.info("####### Start getting Campaigns. #######")
+
         designer_by_gender = [
             'https://www.bestsecret.com/designer.htm?gender=FEMALE&storeGender=true',
             'https://www.bestsecret.com/designer.htm?gender=MALE&storeGender=true',
@@ -105,6 +108,10 @@ class CataloguePageFullShopSpider(scrapy.Spider):
 
         page = response.meta["playwright_page"]
         await page.close()
+
+        # self.logger.info(failed_urls)
+        # self.logger.info(f"Anzahl failed URLs: {len(failed_urls)}")
+        # self.logger.info(f"Anzahl verschiedener CVs: {len(product_ids)}")
         
 
     async def parse_designer_page(self, response):
@@ -120,7 +127,7 @@ class CataloguePageFullShopSpider(scrapy.Spider):
                 yield scrapy.Request(
                     url = url,
                     callback = self.parse_catalogue_page,
-                    errback=self.errback_close_page,
+                    # errback=self.errback_close_page,
                     meta={
                         "playwright": True,
                         "playwright_include_page": True,
@@ -133,17 +140,23 @@ class CataloguePageFullShopSpider(scrapy.Spider):
         page = response.meta["playwright_page"]
         await page.close()
 
-        
-        self.logger.info(failed_urls)
-        self.logger.info(f"Anzahl failed URLs: {len(failed_urls)}")
-        self.logger.info(f"Anzahl verschiedener CVs: {len(product_ids)}")
-
 
     async def parse_catalogue_page(self, response):
 
+        self.logger.info("########################################")
+        self.logger.info("##### Start getting CataloguePage. #####")
+
+
         while True:
 
-            catalogue_products = await CataloguePageScraper.get_catalogue_items(response)
+            # try:
+            catalogue_products, soup = await CataloguePageScraper.get_catalogue_items(response)
+            # except Exception as e:
+            #     self.logger.error("WARNING - Page could not be loaded!")
+            #     self.logger.error(e)
+            #     page = response.meta["playwright_page"]
+            #     await page.close()
+            #     break
         
             for prod in catalogue_products:
                 
@@ -168,7 +181,7 @@ class CataloguePageFullShopSpider(scrapy.Spider):
                 
                 yield item
 
-            check = await CataloguePageScraper.check_next_page(response)
+            check = await CataloguePageScraper.check_next_page(response, soup)
             self.logger.info(f"NextPage: {check}")
 
             page = response.meta["playwright_page"]
